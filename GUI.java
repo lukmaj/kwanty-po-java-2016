@@ -5,6 +5,7 @@ import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.Ellipse2D;
+import java.awt.geom.Point2D;
 
 import javax.swing.JComponent;
 import javax.swing.Timer;
@@ -13,22 +14,30 @@ import javax.swing.Timer;
 public class GUI extends JComponent
 {// P.J.
 	
-	private final double AU = 1.4960e8; // astronomical units in km
+	private final double sunRadius = 6.957e8 * 40;
 	
 	private Planet[] planetModel;
+//	private Ship playerShip;
+	double shipSize;
+	
+	MainWindow mainWindow;
 	
 	private Ellipse2D.Double[] orbits;
 	private Ellipse2D.Double[] planets;
+	private Ellipse2D.Double sun;
 	
-	private double scaleFactor=1;
+//	private Ellipse2D.Double playerShipOrbit;
+	
+	private double scaleFactor;
 	
 	private Timer timeSimulator;
-	private double timeScale=1;
-	private final int dt=1; // time interval in seconds (s)
+	private double timeScale;
+	private final int dt = 1; // time interval in seconds (s)
 	
-	private double screenCenterHeight;
-	private double screenCenterWidth;
-	
+	private double SystemCenterY;
+	private double SystemCenterX;
+
+	double distanceToPixel; // Translates a pixel into an amount of meters
 	
 	public void startTimer()
 	{// L.M.
@@ -39,134 +48,95 @@ public class GUI extends JComponent
 		timeSimulator.stop();
 	}
 	
-	public GUI(Planet[] planetModel)
+	public GUI(Planet[] planetModel, MainWindow mainWindow)
 	{
-		this.scaleFactor=1.0;
-		this.planetModel=planetModel;
-		orbits=new Ellipse2D.Double[8];
-		planets=new Ellipse2D.Double[8];
-
+		this.mainWindow = mainWindow;
 		
-
+		this.scaleFactor = 1.0;
+		this.planetModel = planetModel;
+		this.orbits = new Ellipse2D.Double[8];
+		this.planets = new Ellipse2D.Double[8];
+		this.sun = new Ellipse2D.Double((-1) * sunRadius, (-1) * sunRadius, 2 * sunRadius, 2 * sunRadius);
+		this.shipSize = 5000 * 1e6;
+		
 		
 		for (int ii=0; ii<8; ii++)
 		{
-			/*
-			while (!planetModel[ii].fullOrbit())
-			{
-				planetModel[ii].RK4(dt*60*60*24);
-				System.out.println("Actual radius: "+planetModel[3].getActualRadius());
-//					if (ii==3)
-//						System.out.println("Actual radius: "+planetModel[3].getActualRadius() +" actualAngle: " + planetModel[3].getActualAngle());
-			}
-//			System.out.println("Max radius: "+planetModel[3].getMaxRadius() +" MinRadius: " +planetModel[3].getMinRadius() + " minAngle: " + planetModel[3].getMinAngle() + " MaxAngle: " + planetModel[3].getMaxAngle());
- */
-			orbits[ii]=new Ellipse2D.Double();
-			planets[ii]=new Ellipse2D.Double();
+			this.orbits[ii] = new Ellipse2D.Double();
+			this.planets[ii] = new Ellipse2D.Double();
 		}
 		
-		this.timeScale=1;
+		this.timeScale = 1.0;
 		this.timeSimulator=new Timer(1, new ActionListener()
 		{// L.M. (timer) + P.J(RK4)
-			@Override
+			
 			public void actionPerformed(ActionEvent arg0)
 			{
-				for (int ii=0;ii<planetModel.length;++ii)
+				Ship playerShip = mainWindow.getActualShip();
+				for (int ii=0;ii<planetModel.length; ++ii)
 				{
-					planetModel[ii].RK4(dt*timeScale/1000);
-					//System.out.println(Math.sqrt(Math.pow(planetModel[0].getVX(), 2)+Math.pow(planetModel[0].getVY(), 2)));
-					//planetModel[0].fullOrbit();
+					planetModel[ii].RK4(dt * timeScale/1000);
 					
 				}
+				
+				
+				playerShip.shipAcceleration(planetModel);
+			//	System.out.println("ship X " + playerShip.getX() + " ship Y: " + playerShip.getY());
+			//	System.out.println("earth X: " + planetModel[2].getX() + " earthY: " + planetModel[2].getY());
+				
+			//	System.out.println("playerShip acc: " + playerShip.getA)
+				
+				//System.out.println("delta X: " + Math.abs(playerShip.getX() - planetModel[2].getX()) + " deltaY: " + Math.abs(playerShip.getY() - planetModel[2].getY()));
+				
+				//playerShip.shipAcceleration(planetModel);
+				playerShip.RK4(dt * timeScale/1000);
+				
 				repaint();
 			}
 		});
+		
+		
 	}
 	
 	
 	public void orbitRender() // P.J.
 	{// P.J.
 		
+		double planetaryRadius = 0;
 		
 		
-//		final int screenMargin=2;
-//		double screenMaxWidth=2*planetModel[7].getMaxRadius()/AU + screenMargin; // 61 AU on x axis
-//		double screenMaxHeight=2*planetModel[7].getMinRadius()/AU + screenMargin;
-		
-		
-//		double distanceToPixel = (double)this.getWidth()/screenMaxWidth; // unit: AU
-		
-		/*
-		for (int ii=0; ii< planetModel.length; ++ii)
-		{
- 			double pixelMaxRadius = (planetModel[ii].getMaxRadius()/AU)*distanceToPixel*scaleFactor;
-			double pixelMinRadius = (planetModel[ii].getMinRadius()/AU)*distanceToPixel*scaleFactor;
-			
-			double pixelX=(planetModel[ii].getX()/AU)*distanceToPixel*scaleFactor+screenCenterWidth;
-			double pixelY=(planetModel[ii].getY()/AU)*distanceToPixel*scaleFactor+screenCenterHeight;
-			
-			
-			orbits[ii].setFrameFromCenter(screenCenterWidth, screenCenterHeight, screenCenterWidth-pixelMaxRadius, screenCenterHeight-pixelMinRadius);
-			planets[ii].setFrameFromCenter(pixelX, pixelY, pixelX-2, pixelY-2);
-			
-			
-		}
-		*/
-		double planetaryRadius=1e11/8;
 		for (int ii=0; ii < planetModel.length; ++ii)
 		{
-			
-			orbits[ii].setFrame((-1)*planetModel[ii].getMinRadius(), (-1)*planetModel[ii].getSemiMinorAxis(), 2*planetModel[ii].getSemiMajorAxis(), 2*planetModel[ii].getSemiMinorAxis());
-			planets[ii].setFrame(planetModel[ii].getX()-planetaryRadius, planetModel[ii].getY()-planetaryRadius, 2*planetaryRadius, 2*planetaryRadius);
+//			planetaryRadius = planetModel[ii].getplanetaryRadius() * getScale() * 30;
+			planetaryRadius = planetModel[ii].getplanetaryRadius();
+			orbits[ii].setFrame((-1) * planetModel[ii].getMinRadius(), (-1) * planetModel[ii].getSemiMinorAxis(), 2 * planetModel[ii].getSemiMajorAxis(), 2 * planetModel[ii].getSemiMinorAxis());
+			planets[ii].setFrame(planetModel[ii].getX() - planetaryRadius, planetModel[ii].getY() - planetaryRadius, 2 * planetaryRadius, 2 * planetaryRadius);
 		}
 	}
-	
-	public void paintComponent2(Graphics g)
-	{ // P.J.
-		Graphics2D g2 = (Graphics2D) g;
-		g2.setPaint(Color.RED);
-		orbitRender();
-		for (int ii=0;ii< orbits.length;++ii)
-		{
-			g2.draw(orbits[ii]);
-			
-		}
-		
-		g2.setPaint(Color.BLACK);
-		for (int ii=0;ii<planetModel.length;++ii)
-		{
-			g2.draw(planets[ii]);
-			g2.fill(planets[ii]);
-		}
-		
-	}
-	
+
 	public void paintComponent(Graphics g)
 	{ // P.J.
 		
-		screenCenterHeight=(double)this.getHeight()/2;
-		screenCenterWidth=(double)this.getWidth()/2;
+		double screenMaxWidth = 2 * planetModel[7].getMaxRadius();
 		
-		final int screenMargin=2;
-		double screenMaxWidth=2*planetModel[7].getMaxRadius() + screenMargin;
-		double screenMaxHeight=2*planetModel[7].getMinRadius() + screenMargin;
-		
-		
-		double distanceToPixel = scaleFactor*(double)this.getWidth()/screenMaxWidth;// unit: AU
-		
+		distanceToPixel = scaleFactor * (double)this.getWidth()/screenMaxWidth;
 		
 		Graphics2D g2 = (Graphics2D) g;
-		g2.setPaint(Color.RED);
-	//	System.out.println("X: "+screenCenterWidth + " Y: " +screenCenterHeight);
-		g2.translate(screenCenterWidth, screenCenterHeight);
-		g2.draw(new Ellipse2D.Double(-2,-2,4,4));
+		
+		g2.setPaint(Color.YELLOW);
+		g2.translate(SystemCenterX, SystemCenterY);
 		g2.scale(distanceToPixel, distanceToPixel);
+		g2.fill(sun);
+		
 		orbitRender();
+		
+		g2.setPaint(Color.RED);
 		for (int ii=0;ii< orbits.length;++ii)
 		{
 			g2.draw(orbits[ii]);
-			
 		}
+		
+		
 		
 		g2.setPaint(Color.BLACK);
 		for (int ii=0;ii<planetModel.length;++ii)
@@ -176,7 +146,21 @@ public class GUI extends JComponent
 		//	System.out.println(" "+ planets[ii].getBounds2D().getHeight());
 		}
 		
+		Ship playerShip = mainWindow.getActualShip();
 		
+		if (playerShip!=null)
+		{
+			g2.setPaint(Color.BLUE);
+			g2.fill(playerShip.getShipShape(shipSize));
+			g2.draw(playerShip.getOrbitShape());
+			
+			g2.setPaint(Color.GREEN);
+			g2.draw(new Ellipse2D.Double(playerShip.getX(), playerShip.getY(), 1, 1));
+		}
+		
+		g2.setPaint(Color.GREEN);
+		for (int ii=0; ii< orbits.length; ++ii)
+			g2.draw(new Ellipse2D.Double(planetModel[ii].getX(), planetModel[ii].getY(), 1, 1));
 		
 	}
 	
@@ -187,7 +171,8 @@ public class GUI extends JComponent
 	
 	public void setScale(double newScale)
 	{// L.M.
-		scaleFactor=newScale;
+		if (newScale > 0)
+			scaleFactor=newScale;
 	}
 	
 	public double getTimeScale()
@@ -197,13 +182,41 @@ public class GUI extends JComponent
 	
 	public void setTimeScale(double newTimeModifier)
 	{// L.M.
-		timeScale=newTimeModifier;
+		if (newTimeModifier > 0)
+			timeScale=newTimeModifier;
+	}
+	
+	public Point2D.Double translateFromPixeltoMeters(Point2D mousePoint)
+	{
+		double newPointX = (mousePoint.getX() - SystemCenterX)/distanceToPixel;
+		double newPointY = (mousePoint.getY() - SystemCenterY)/distanceToPixel;
+		
+		return new Point2D.Double(newPointX, newPointY);
+	}
+	
+	public Point2D.Double getCenterInPixels()
+	{
+		return new Point2D.Double(SystemCenterX, SystemCenterY);
+	}
+	
+	public void setCenterInPixels(Point2D.Double newSystemCenter)
+	{
+		SystemCenterX = newSystemCenter.getX();
+		SystemCenterY = newSystemCenter.getY();
 	}
 	
 	public void printSize()
 	{// L.M.
-		System.out.println("Height i width" + this.getHeight()+" "+this.getWidth());
+		System.out.println("Height i width" + this.getHeight()+ " "+this.getWidth());
 	}
 	
 	
+	
+	
+	
+	public void setDefaultCenter()
+	{
+		SystemCenterY=(double)this.getHeight()/2;
+		SystemCenterX=(double)this.getWidth()/2;
+	}
 }
