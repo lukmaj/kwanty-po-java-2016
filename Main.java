@@ -6,7 +6,8 @@ public class Main
 	public static void main(String[] args)
 	{
 		JFrame game = new MainWindow();
-		game.setVisible(true);
+//		game.setVisible(true);
+		game.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 	}
 
