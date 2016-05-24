@@ -1,5 +1,6 @@
 package pl.edu.pw.fizyka.pojava.Kwanty;
 
+import java.awt.geom.GeneralPath;
 
 // Klasa P.J.
 
@@ -12,9 +13,14 @@ public class Planet extends CelestialBody
 	
 	private double planetRadius;
 	
+	
+	
+	
 	public Planet(double mass, double maxRadius, double minRadius, double planetRadius)
 	{
 		super(mass, maxRadius, minRadius);
+		
+		
 		
 		this.planetRadius = planetRadius * scaleRadius;
 		
@@ -57,6 +63,61 @@ public class Planet extends CelestialBody
 	{
 		return planetRadius;
 	}
+	
+	public GeneralPath getorbitPath()
+	{
+		return orbitPath;
+	}
+	
+
+
+	/*
+	public void run()
+	{
+		
+		Point2D.Double pointBegin = new Point2D.Double(this.x, this.y);
+		final Point2D.Double pointStart = pointBegin;
+		Point2D.Double pointEnd = null;
+		
+		final Point2D.Double centerPoint = new Point2D.Double(0, 0); 
+		Line lineBegin = new Line(centerPoint, new Point2D.Double(this.x, this.y));
+		final Line lineStart = lineBegin;
+		Line lineEnd = null;
+		
+		Point2D.Double controlPoint;
+		
+		orbitPath.moveTo(this.x, this.y);
+		double lastAngle = actualAngle;
+		while (!fullOrbit())
+		{
+			RK4(dt);
+			if(Math.abs(lastAngle - actualAngle) >= 1)
+			{
+				lastAngle = actualAngle;
+//				orbitPath.lineTo(this.x, this.y);
+				pointEnd = new Point2D.Double(this.x, this.y);
+				lineEnd = new Line(centerPoint, pointEnd);
+				controlPoint = Line.intersectionPoint(lineBegin.perpendicularLine(pointBegin), lineEnd.perpendicularLine(pointEnd));
+				orbitPath.quadTo(controlPoint.getX(), controlPoint.getY(), pointEnd.getX(), pointEnd.getY());
+				lineBegin = lineEnd;
+//				lineEnd = null;
+				pointBegin = pointEnd;
+//				pointEnd = null;
+			}
+			
+		}
+		
+		
+		controlPoint = Line.intersectionPoint(lineEnd.perpendicularLine(pointEnd), lineStart.perpendicularLine(pointStart));
+		orbitPath.quadTo(pointEnd.getX(), pointEnd.getY(), pointStart.getX(), pointStart.getY());
+		
+		
+	
+		
+	}
+	*/
+	
+	
 	
 	/*
 	public boolean fullOrbit() // returns true if orbit is complete
