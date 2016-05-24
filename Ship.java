@@ -4,7 +4,7 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
 
 public class Ship extends CelestialBody
-{
+{ //PJ
 //	private Point2D.Double shipLocation;
 //	private final double shipSize = 1e9;
 //	private double shipRadius;
@@ -12,6 +12,8 @@ public class Ship extends CelestialBody
 //	private double engineAcceleration;
 	private double engineAccelerationX;
 	private double engineAccelerationY;
+	
+
 	
 	
 	public Ship(double mass, double shipOrbitRadius, Point2D.Double shipLocation)
@@ -27,16 +29,15 @@ public class Ship extends CelestialBody
 	//	this.actualRadius = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
 		
 		initValue();
+		
+		this.a = 0;
+		this.ax = 0;
+		this.ay = 0;
 	}
 	
 	public Ellipse2D.Double getShipShape(double shipSize)
 	{
 		return new Ellipse2D.Double(this.getX() - shipSize, this.getY() - shipSize, 2 * shipSize, 2 * shipSize);
-	}
-	
-	public Ellipse2D.Double getOrbitShape()
-	{
-		return new Ellipse2D.Double((-1) * actualRadius, (-1) * actualRadius, 2 * actualRadius, 2 * actualRadius);
 	}
 	
 	/// acceleration superposition
@@ -53,9 +54,9 @@ public class Ship extends CelestialBody
 			double planetToShipDistanceY = this.y - planetModel[ii].getY();			
 			double planetToShipDistance = Math.sqrt(Math.pow(planetToShipDistanceX, 2) + Math.pow(planetToShipDistanceY, 2));
 			
-			if (planetToShipDistance < 100 * planetModel[ii].getplanetaryRadius())
+//			if (planetToShipDistance < 100 * planetModel[ii].getplanetaryRadius())
 			{
-				double shipAccelerationFromPlanet = 2 * planetModel[ii].getAccelerationAtPoint(planetToShipDistance);
+				double shipAccelerationFromPlanet = planetModel[ii].getAccelerationAtPoint(planetToShipDistance);
 				double shipAccelerationFromPlanetX = shipAccelerationFromPlanet * (planetToShipDistanceX/planetToShipDistance);
 				double shipAccelerationFromPlanetY = shipAccelerationFromPlanet * (planetToShipDistanceY/planetToShipDistance);
 			
@@ -64,24 +65,27 @@ public class Ship extends CelestialBody
 			}
 		}
 		
-		double solarRadius = 6.957e8 * 40;
+//		double solarRadius = 6.957e8 * 40;
 		
-		if (actualRadius < 2 * solarRadius)
+//		if (actualRadius < 1.5 * solarRadius)
 		{
-			double shipAccelerationFromSun = (-1) * 2 * Math.pow(40, 2) * GMs/Math.pow(actualRadius, 2); 
+			double shipAccelerationFromSun = (-1) * Math.pow(40, 2) * GMs/Math.pow(actualRadius, 2); 
 			double shipAccelerationFromSunX = shipAccelerationFromSun * (this.x/actualRadius);
 			double shipAccelerationFromSunY = shipAccelerationFromSun * (this.y/actualRadius);
 		
 			this.ax += shipAccelerationFromSunX;
 			this.ay += shipAccelerationFromSunY;
+//			System.out.println("sun x" + Math.sqrt(Math.pow(ax, 2) + Math.pow(ay, 2)));
 		}
 		
 	//	this.a += engineAcceleration;
 		this.ax += engineAccelerationX;
 		this.ay += engineAccelerationY;
+		
+	
 	//	this.a=Math.sqrt(Math.pow(this.ax, 2) + Math.pow(this.ay, 2));
 		
-	//	System.out.println("total a: "+ this.a);
+		System.out.println("ax: "+ this.ax + " ay: " + this.ay);
 		
 	}
 	
@@ -89,7 +93,7 @@ public class Ship extends CelestialBody
 	{
 		return a;
 	}
-	
+	/*
 	public void RK4(double dt)
 	{ // Runge Kutta 4th order ODE simulation
 		
@@ -138,12 +142,12 @@ public class Ship extends CelestialBody
 			
 		actualRadius = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
 		v = Math.sqrt(Math.pow(vx, 2) + Math.pow(vy, 2));
-	//	a = (-1) * GMs/Math.pow(actualRadius, 2);
+//		a = (-1) * GMs/Math.pow(actualRadius, 2);
 		
 	//	ax = a * (x/this.actualRadius);
 	//	ay = a * (y/this.actualRadius);
 	}
-
+*/
 	public void engineAcceleration(double accelerationX, double accelerationY)
 	{
 		engineAccelerationX = accelerationX;
@@ -154,4 +158,7 @@ public class Ship extends CelestialBody
 	{
 		return (bodyMass * Math.pow(v, 2)/2);
 	}
+
+
+	
 }

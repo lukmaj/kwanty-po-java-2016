@@ -5,24 +5,23 @@ import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.border.Border;
 
+@SuppressWarnings("serial")
 public class EngineDialog extends JDialog
-{
+{ // LM
 	private boolean enginesOnline;
 	
 	private JLabel accelerationX;
 	private JLabel accelerationY;
 	private JTextField accelerationXField;
 	private JTextField accelerationYField;
-	private JLabel fuelLabel;
-	private JLabel fuelStatus;
+//	private JLabel fuelLabel;
+//	private JLabel fuelStatus;
 	
 	JButton engineStatus;
 	JButton implementAccelerations;
@@ -59,11 +58,11 @@ public class EngineDialog extends JDialog
 //		implementAccelerations.setSize(d);
 		center2.add(implementAccelerations);
 		
-		fuelLabel = new JLabel("Fuel remaining: ");
-		fuelStatus = new JLabel("100" + " %");
+//		fuelLabel = new JLabel("Fuel remaining: ");
+//		fuelStatus = new JLabel("100" + " %");
 		
-		center3.add(fuelLabel);
-		center3.add(fuelStatus);
+//		center3.add(fuelLabel);
+//		center3.add(fuelStatus);
 		
 		centerPanel.add(center1);
 		centerPanel.add(center2);
@@ -82,7 +81,7 @@ public class EngineDialog extends JDialog
 		
 		
 		this.setTitle("Ship Settings");
-		this.setSize(300, 300);
+		this.pack();
 		
 		engineStatus.addActionListener(new ActionListener()
 		{

@@ -1,6 +1,4 @@
 package pl.edu.pw.fizyka.pojava.Kwanty;
-import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Toolkit;
@@ -13,17 +11,11 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.Point2D;
 
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javax.swing.border.Border;
 
 // Klasa L.M.
 
@@ -76,7 +68,6 @@ public class MainWindow extends JFrame
 		
 		this.addShip = false;
 		this.playerShip = null;
-//		this.enginesOnline = false;
 		
 		setMenu();
 		this.addMouseListener(new MouseListener()
@@ -93,11 +84,14 @@ public class MainWindow extends JFrame
 //					Point2D.Double shipLocation = new Point2D.Double(solarSystem[x].getX() + solarSystem[x].getplanetaryRadius(), solarSystem[x].getY()+solarSystem[x].getplanetaryRadius());
 					
 //					Point2D.Double shipLocation = new Point2D.Double(0, -6.957e8 * 40); // debug for sun
-					// doesn't draw properly?????????
 					
 					double shipRadius = Math.sqrt(Math.pow(shipLocation.getX(), 2) + Math.pow(shipLocation.getY(), 2));
 					playerShip = new Ship(30e3, shipRadius, shipLocation);
+					LoadShipOrbit shipOrbit = new LoadShipOrbit(playerShip);
+					shipOrbit.generateShipOrbit();
 					addShip = false;
+					
+					
 					
 					illustrate.repaint();
 					
@@ -111,11 +105,11 @@ public class MainWindow extends JFrame
 				}
 			}
 
-			public void mouseEntered(MouseEvent arg0) {
-			}
+			public void mouseEntered(MouseEvent arg0)
+			{}
 
-			public void mouseExited(MouseEvent arg0) {
-			}
+			public void mouseExited(MouseEvent arg0) 
+			{}
 
 			public void mousePressed(MouseEvent arg0)
 			{
@@ -135,16 +129,15 @@ public class MainWindow extends JFrame
 			}
 		});
 		
-		this.addMouseMotionListener(new MouseMotionAdapter(){
-			
+		this.addMouseMotionListener(new MouseMotionAdapter()
+		{
 			public void mouseDragged(MouseEvent e)
 			{
-				//System.out.println("e: " + e.getModifiersEx());
-				//if ((e.getModifiersEx() & InputEvent.BUTTON3_DOWN_MASK)!=0)
 				{
 					double newCenterX = oldCenter.getX() + (e.getPoint().getX() - startPoint.getX());
 					double newCenterY = oldCenter.getY() + (e.getPoint().getY() - startPoint.getY());
 					
+//					System.out.println("x " + newCenterX + " y " + newCenterY);
 					illustrate.setCenterInPixels(new Point2D.Double(newCenterX, newCenterY));
 					
 					illustrate.repaint();
@@ -204,6 +197,17 @@ public class MainWindow extends JFrame
 		menuFile.add(addShipOption);
 		menuFile.add(exitOption);
 		
+		startSim.setEnabled(false);
+		stopSim.setEnabled(false);
+		saveOption.setEnabled(false);
+		loadOption.setEnabled(false);
+		
+		shipSettings = new JMenu("Ship");
+		menuBar.add(shipSettings);
+		
+		engineSettings = new JMenuItem("Ship engines");
+		shipSettings.add(engineSettings);
+		
 		exitOption.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
@@ -219,11 +223,14 @@ public class MainWindow extends JFrame
 				addShip=true;
 				JOptionPane.showMessageDialog(MainWindow.this, "Place the ship on the map with Left Mouse Button");
 				
+				startSim.setEnabled(true);
+				stopSim.setEnabled(true);
+				saveOption.setEnabled(true);
+				loadOption.setEnabled(true);	
 			}
 		});
 		
-		startSim.setEnabled(true);
-		stopSim.setEnabled(false);
+		
 		
 		startSim.addActionListener(new ActionListener()
 		{
@@ -278,10 +285,7 @@ public class MainWindow extends JFrame
 		});
 		
 		
-		shipSettings = new JMenu("Ship");
-		menuBar.add(shipSettings);
-		engineSettings = new JMenuItem("Ship engines");
-		shipSettings.add(engineSettings);
+		
 		
 		engineSettings.addActionListener(new ActionListener()
 		{

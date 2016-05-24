@@ -1,7 +1,9 @@
 package pl.edu.pw.fizyka.pojava.Kwanty;
 
+import java.awt.geom.GeneralPath;
+import java.awt.geom.Point2D;
 
-public abstract class CelestialBody
+public abstract class CelestialBody implements Runnable
 { // P.J./L.M
 	static protected final double G = 6.667408e-11;
 	static protected final double solarMass = 1.98855e30;
@@ -12,6 +14,8 @@ public abstract class CelestialBody
 	protected double maxRadius; // m
 	protected double minRadius; // m
 	protected double actualRadius; // m
+	protected double tempMinRadius;
+	protected double tempMaxRadius;
 	protected double a; // m/s^2
 	protected double v; // m/s
 
@@ -37,6 +41,9 @@ public abstract class CelestialBody
 	protected double eccentricity;
 	protected double majorOrbitSemiAxis;
 	protected double minorOrbitSemiAxis;
+	protected GeneralPath orbitPath;
+	
+	protected double dt;
 	
 	CelestialBody(double mass, double maxRadius, double minRadius)
 	{
@@ -47,6 +54,8 @@ public abstract class CelestialBody
 		
 		this.majorOrbitSemiAxis = (this.maxRadius + this.minRadius)/2;
 		this.minorOrbitSemiAxis = Math.sqrt(this.minRadius) * Math.sqrt(this.maxRadius);
+		
+		orbitPath = new GeneralPath();
 	}
 	
 	public void initValue()
@@ -118,10 +127,138 @@ public abstract class CelestialBody
 		v = Math.sqrt(Math.pow(vx, 2) + Math.pow(vy, 2));
 		a = (-1) * GMs/Math.pow(actualRadius, 2);
 		
+		
 	//	ax = a * (x/this.actualRadius);
 	//	ay = a * (y/this.actualRadius);
 	}
 	
+	public boolean fullOrbit() // returns true if orbit is complete
+	{
+		double oldAngle = actualAngle;
+		actualAngle = Math.toDegrees(Math.atan2(-y, x));
+		if (actualAngle < 0)
+			actualAngle += 360.0;
+		
+		if(oldAngle - actualAngle > 180)
+			flag360 = true;
+			
+			
+		if (this.actualRadius > this.tempMaxRadius)
+		{
+			this.tempMaxRadius = this.actualRadius;
+			this.maxAngle = this.actualAngle;
+		}
+		else if(this.actualRadius < this.tempMinRadius)
+		{
+			this.tempMinRadius = this.actualRadius;
+			this.minAngle = this.actualAngle;
+		}
+		
+		if (halfOrbitAngle > beginAngle)
+		{
+			if(actualAngle >= halfOrbitAngle)
+			{
+				if (!halfOrbit)
+				{
+//					System.out.println("Polowa orbity");
+					halfOrbit = true;
+				}
+				
+				return false;
+			}
+			
+			if (halfOrbit && actualAngle >= beginAngle && actualAngle < halfOrbitAngle)
+			{
+				halfOrbit = false;
+//				System.out.println("Aktualizacja orbity");
+				
+				this.maxRadius = this.tempMaxRadius;
+				this.minRadius = this.tempMinRadius;
+//				System.out.println("Max angle: "+ maxAngle);
+//				System.out.println("Min angle: "+ minAngle);
+				return true;
+				// aktualizacja elipsy
+			}
+		}
+		else //halfOrbitAngle<beginAngle
+		{
+			if(actualAngle >= halfOrbitAngle && actualAngle < beginAngle)
+			{
+				if (!halfOrbit)
+				{
+//					System.out.println("Polowa orbity");
+					halfOrbit = true;
+				}
+				
+				return false;
+			}
+				
+			if (halfOrbit && actualAngle >= beginAngle)
+			{
+				halfOrbit = false;
+//				System.out.println("Aktualizacja orbity");
+				
+				this.maxRadius = this.tempMaxRadius;
+				this.minRadius = this.tempMinRadius;
+//				System.out.println("Max angle: "+ maxAngle);
+//				System.out.println("Min angle: "+ minAngle);
+				return true;
+				// aktualizacja elipsy
+			}
+		}
+		
+		return false;
+	}
+	
+	
+	
+	public void run()
+	{
+		Point2D.Double pointBegin = new Point2D.Double(this.x, this.y);
+		final Point2D.Double pointStart = pointBegin;
+		Point2D.Double pointEnd = null;
+		
+		final Point2D.Double centerPoint = new Point2D.Double(0, 0); 
+		Line lineBegin = new Line(centerPoint, new Point2D.Double(this.x, this.y));
+		final Line lineStart = lineBegin;
+		Line lineEnd = null;
+		
+		Point2D.Double controlPoint;
+		
+		orbitPath.moveTo(this.x, this.y);
+		double lastAngle = actualAngle;
+		while (!fullOrbit())
+		{
+			RK4(dt);
+			if(Math.abs(lastAngle - actualAngle) >= 1)
+			{
+				lastAngle = actualAngle;
+//				orbitPath.lineTo(this.x, this.y);
+				pointEnd = new Point2D.Double(this.x, this.y);
+				lineEnd = new Line(centerPoint, pointEnd);
+				controlPoint = Line.intersectionPoint(lineBegin.perpendicularLine(pointBegin), lineEnd.perpendicularLine(pointEnd));
+//				orbitPath.lineTo(pointEnd.getX(), pointEnd.getY());
+				orbitPath.quadTo(controlPoint.getX(), controlPoint.getY(), pointEnd.getX(), pointEnd.getY());
+				lineBegin = lineEnd;
+//				lineEnd = null;
+				pointBegin = pointEnd;
+//				pointEnd = null;
+			}
+			
+		}
+		
+		
+		controlPoint = Line.intersectionPoint(lineEnd.perpendicularLine(pointEnd), lineStart.perpendicularLine(pointStart));
+		orbitPath.quadTo(pointEnd.getX(), pointEnd.getY(), pointStart.getX(), pointStart.getY());
+		
+		
+	}
+	
+	
+	public GeneralPath getOrbitShape()
+	{
+		return orbitPath;
+	}
 	
 	
 	// Planet parameters getters
@@ -202,86 +339,10 @@ public abstract class CelestialBody
 		return this.ay;
 	}
 
-	
-	/*
-	public boolean fullOrbit() // returns true if orbit is complete
+	public void setdt(double newdt)
 	{
-		double oldAngle=actualAngle;
-		actualAngle=Math.toDegrees(Math.atan2(-y, x));
-		if (actualAngle<0)
-			actualAngle+=360.0;
-		
-		if(oldAngle-actualAngle>180)
-			flag360=true;
-			
-			
-		if (this.actualRadius>this.tempMaxRadius)
-		{
-			this.tempMaxRadius=this.actualRadius;
-			this.maxAngle=this.actualAngle;
-		}
-		else if(this.actualRadius<this.tempMinRadius)
-		{
-			this.tempMinRadius=this.actualRadius;
-			this.minAngle=this.actualAngle;
-		}
-			//System.out.println(actualAngle);
-		if (halfOrbitAngle>beginAngle)
-		{
-			if(actualAngle>=halfOrbitAngle)
-			{
-				if (!halfOrbit)
-				{
-					System.out.println("Polowa orbity");
-					halfOrbit=true;
-				}
-				
-				return false;
-			}
-			
-			if (halfOrbit && actualAngle>=beginAngle && actualAngle<halfOrbitAngle)
-			{
-				halfOrbit=false;
-				System.out.println("Aktualizacja orbity");
-				
-				this.maxRadius=this.tempMaxRadius;
-				this.minRadius=this.tempMinRadius;
-				System.out.println("Max angle: "+ maxAngle);
-				System.out.println("Min angle: "+ minAngle);
-				return true;
-				// aktualizacja elipsy
-			}
-		}
-		else //halfOrbitAngle<beginAngle
-		{
-			if(actualAngle>=halfOrbitAngle && actualAngle<beginAngle)
-			{
-				if (!halfOrbit)
-				{
-					System.out.println("Polowa orbity");
-					halfOrbit=true;
-				}
-				
-				return false;
-			}
-				
-			if (halfOrbit && actualAngle>=beginAngle)
-			{
-				halfOrbit=false;
-				System.out.println("Aktualizacja orbity");
-				
-				this.maxRadius=this.tempMaxRadius;
-				this.minRadius=this.tempMinRadius;
-				System.out.println("Max angle: "+ maxAngle);
-				System.out.println("Min angle: "+ minAngle);
-				return true;
-				// aktualizacja elipsy
-			}
-		}
-			
-			
-			
-		return false;
+		dt = newdt;
 	}
-	*/
+	
+
 }
