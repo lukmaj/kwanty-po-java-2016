@@ -1,4 +1,4 @@
-package pl.edu.pw.fizyka.pojava.Kwanty;
+package src.pl.edu.pw.fizyka.pojava.Kwanty;
 
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
