@@ -1,5 +1,4 @@
-package pl.edu.pw.fizyka.pojava.Kwanty;
-
+package src.pl.edu.pw.fizyka.pojava.Kwanty;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
 

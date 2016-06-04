@@ -8,8 +8,7 @@ import javax.swing.Timer;
 
 public class ShipOrbitCycleThread implements Runnable
 { // orbitCyclicalTimer checks whether the thread, which refreshes the orbit, is active. If not, then it's brought to life.
-	// If the timer is stopped, then the thread has to be killed if active. 
-	//P.J.
+	// If the timer is stopped, then the thread has to be killed if active.
 
 	public final double solarRadius;
 	private Ship playerShip;

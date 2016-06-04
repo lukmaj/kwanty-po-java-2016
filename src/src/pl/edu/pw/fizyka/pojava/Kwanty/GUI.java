@@ -1,4 +1,4 @@
-package pl.edu.pw.fizyka.pojava.Kwanty;
+package src.pl.edu.pw.fizyka.pojava.Kwanty;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;

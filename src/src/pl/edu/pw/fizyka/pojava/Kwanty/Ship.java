@@ -5,7 +5,7 @@ import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
 
 public class Ship extends CelestialBody
-{ //P.J. (simulations), L.M.
+{ //P.J.
 
 	private double engineAccelerationX;
 	private double engineAccelerationY;

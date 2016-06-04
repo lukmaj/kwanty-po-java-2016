@@ -1,5 +1,4 @@
 package src.pl.edu.pw.fizyka.pojava.Kwanty;
-
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Toolkit;
@@ -15,7 +14,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 
-// P.J./L.M.
+// Klasa L.M.
 
 
 @SuppressWarnings("serial")
