@@ -1,4 +1,4 @@
-package pl.edu.pw.fizyka.pojava.Kwanty;
+package src.pl.edu.pw.fizyka.pojava.Kwanty;
 
 public class LoadShipOrbit 
 {
