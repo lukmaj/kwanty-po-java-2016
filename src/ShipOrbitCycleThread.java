@@ -1,4 +1,4 @@
-package pl.edu.pw.fizyka.pojava.Kwanty;
+package src.pl.edu.pw.fizyka.pojava.Kwanty;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
